@@ -1,0 +1,119 @@
+# Включение модуля mod_rewrite
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Перенаправление с www на без www с учетом HTTPS
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+  # Редиректы для dex* и note*
+  RewriteCond %{HTTP_HOST} ^(dex[0-9]+|note1[12])\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://bushurov.group/%1 [R=301,L]
+
+  # Редирект для price, oferta, avito, cian, tenchat, whoiswho (особые случаи)
+  RewriteCond %{HTTP_HOST} ^price\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://bushurov.group/price [R=301,L]
+
+  RewriteCond %{HTTP_HOST} ^oferta\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://bushurov.group/pub-oferta [R=301,L]
+
+  RewriteCond %{HTTP_HOST} ^avito\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://www.avito.ru/brands/i83704480 [R=301,L]
+
+  RewriteCond %{HTTP_HOST} ^cian\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://www.cian.ru/agents/133791/ [R=301,L]
+  
+  RewriteCond %{HTTP_HOST} ^tenchat\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://tenchat.ru/bushurovgroup [R=301,L]
+  
+  RewriteCond %{HTTP_HOST} ^whoiswho\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://whoiswho.dp.ru/cart/company/3244769 [R=301,L]
+
+  # Редиректы для rfnc* (коммерческая недвижимость)
+  RewriteCond %{HTTP_HOST} ^rfnc([0-9]+)\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://rfn.spb.ru/catalog/commerc/%1/ [R=301,L]
+
+  # Редиректы для rfns* (вторичная недвижимость)
+  RewriteCond %{HTTP_HOST} ^rfns([0-9]+)\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://rfn.spb.ru/catalog/second/%1/ [R=301,L]
+
+  # Редиректы для rfnz* (загородная недвижимость)
+  RewriteCond %{HTTP_HOST} ^rfnz([0-9]+)\.bushurov\.group$ [NC]
+  RewriteRule ^(.*)$ https://rfn.spb.ru/catalog/zagorod/%1/ [R=301,L]
+
+  # Удаление index.html и подобных из URL
+  RewriteCond %{THE_REQUEST} \s/(index|home|default)\.(htm|html|php|shtml|asp|aspx|cfm|pl)\s [NC]
+  RewriteRule ^(.*)(index|home|default)\.(htm|html|php|shtml|asp|aspx|cfm|pl)$ /$1 [R=301,L]
+
+  # Удаление .html из URL
+  RewriteCond %{THE_REQUEST} \s/(.+?)\.html\s [NC]
+  RewriteRule ^(.+?)\.html$ /$1 [R=301,L]
+
+  # Добавление .html к URL, если файл существует
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+  # Обработка PHP-файлов
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(([^/]+/)*[^.]+)$ /$1.php [L]
+
+  # Перенаправление с index на корень
+  RewriteCond %{REQUEST_URI} ^/index$ [OR]
+  RewriteCond %{REQUEST_URI} ^/index[.]+(\w+)$
+  RewriteRule . / [R=301,L]
+</IfModule>
+
+# Настройки кэширования и MIME-типов
+<FilesMatch "\.(webp|jpg|jpeg|png|gif|js|json|webmanifest|html|css|swf|x-html|xml|ico|pdf|flv|woff|woff2|eot|ttf|otf|svg|mov|avi|mp3|aac|m4a|mp4|ogg|webm)(\.gz)?$">
+  <IfModule mod_expires.c>
+    # Добавление MIME-типов
+    AddType application/font-woff2 .woff2
+    AddType application/font-woff .woff
+    AddType application/x-font-truetype .ttf
+    AddType application/x-font-opentype .otf
+    AddType application/octet-stream .rar .zip .doc .mov .avi .pdf .xls
+    AddType image/svg+xml .svg .svgz
+    AddEncoding gzip .svgz
+
+    # Включение кэширования
+    ExpiresActive On
+    ExpiresDefault "access plus 6 months"
+
+    # Настройка кэширования для различных типов файлов
+    ExpiresByType text/plain "access plus 6 months"
+    ExpiresByType text/html "access plus 1 day"
+    ExpiresByType text/css "access plus 6 months"
+    ExpiresByType text/javascript "access plus 6 months"
+    ExpiresByType application/javascript "access plus 6 months"
+    ExpiresByType application/json "access plus 6 months"
+    ExpiresByType application/manifest+json "access plus 6 months"
+    ExpiresByType image/* "access plus 6 months"
+    ExpiresByType audio/* "access plus 6 months"
+    ExpiresByType video/* "access plus 6 months"
+    ExpiresByType font/* "access plus 6 months"
+    ExpiresByType application/pdf "access plus 6 months"
+  </IfModule>
+
+  <IfModule mod_headers.c>
+    # Установка заголовков для кэширования
+    Header set Cache-Control "max-age=10368000, public"
+    Header unset ETag
+    Header set Connection keep-alive
+    FileETag None
+  </IfModule>
+</FilesMatch>
+
+# Общие настройки сервера
+Options -Indexes -Includes +FollowSymLinks
+AddDefaultCharset utf-8
+AddCharset utf-8 .html .css .js
+DefaultLanguage ru
+DirectoryIndex index.html
+
+# Обработка ошибок
+ErrorDocument 404 /error404page.html
+ErrorDocument 403 /error403page.html
+ErrorDocument 400 /index.html

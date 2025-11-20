@@ -1,0 +1,19 @@
+User-agent: *
+
+Disallow: /cgi-bin/
+
+Disallow: /library/
+
+Disallow: /test/
+
+Disallow: /error403page.html
+
+Disallow: /error404page.html
+
+Disallow: /error404page.php
+
+Sitemap: https://bushurov.group/sitemap.xml
+
+Sitemap: https://leningrad.online/sitemap-leningradonline.xml
+
+Sitemap: https://m2-spb.ru/sitemap-m2-spbru.xml
